@@ -354,7 +354,7 @@ export default function App() {
 
       {/* Section 02 */}
       <section className="section-02">
-        <TodayFocus />
+        <TodayFocus onUpdateQuote={setQuote} />
         <MoodTracker />
       </section>
 
