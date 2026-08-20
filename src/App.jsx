@@ -77,7 +77,8 @@ const translateLocation = (name) => {
 export default function App() {
   const [time, setTime] = useState(new Date())
   const [weather, setWeather] = useState({ temp: '25', desc: '맑음', location: '경기도 수원시', icon: 'sun' })
-  const [userName, setUserName] = useState(() => localStorage.getItem('dashboard_username') || '홍길동 님')
+  const [userName, setUserName] = useState(() => localStorage.getItem('dashboard_username') || '')
+  const [loginInput, setLoginInput] = useState('')
   
   // Timer State
   const [timerSeconds, setTimerSeconds] = useState(25 * 60)
@@ -237,11 +238,19 @@ export default function App() {
     setDdayIndex(prev => (prev + 1) % D_DAY_GOALS.length)
   }
 
-  const handleLogout = () => {
-    if (confirm('모든 로컬 저장 데이터를 초기화하시겠습니까?')) {
-      localStorage.clear()
-      window.location.reload()
+  const handleLoginSubmit = (e) => {
+    e.preventDefault()
+    if (loginInput.trim()) {
+      const nameWithSuffix = `${loginInput.trim()} 님`
+      setUserName(nameWithSuffix)
+      localStorage.setItem('dashboard_username', nameWithSuffix)
+      setLoginInput('')
     }
+  }
+
+  const handleLogout = () => {
+    setUserName('')
+    localStorage.removeItem('dashboard_username')
   }
 
   const handleEditName = () => {
@@ -254,6 +263,29 @@ export default function App() {
   }
 
   const currentDday = D_DAY_GOALS[ddayIndex]
+
+  if (!userName) {
+    return (
+      <div className="login-container">
+        <div className="login-card">
+          <h1 className="login-title">환영합니다!</h1>
+          <p className="login-subtitle">대시보드를 시작하기 위해 이름을 입력해주세요.</p>
+          <form onSubmit={handleLoginSubmit} className="login-form">
+            <input
+              type="text"
+              className="login-input"
+              placeholder="이름 입력"
+              value={loginInput}
+              onChange={(e) => setLoginInput(e.target.value)}
+              required
+              maxLength={20}
+            />
+            <button type="submit" className="login-btn">시작하기</button>
+          </form>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="dashboard-container">
@@ -282,9 +314,9 @@ export default function App() {
             <span className="header-title-text">{userName}</span>
           </button>
           
-          <button className="round-card btn-logout" onClick={handleLogout} title="데이터 초기화">
+          <button className="round-card btn-logout" onClick={handleLogout} title="로그아웃">
             <LogOut size={16} className="icon-red" />
-            <span className="header-title-text">초기화</span>
+            <span className="header-title-text">로그아웃</span>
           </button>
         </div>
       </header>
