@@ -43,6 +43,37 @@ const renderWeatherIcon = (iconName) => {
   }
 }
 
+// Weather icon helper functions (declared outside the component)
+const translateLocation = (name) => {
+  if (!name) return '경기도 수원시'
+  const lower = name.toLowerCase()
+  if (lower.includes('suwon') || lower.includes('jangan') || lower.includes('gwonseon') || lower.includes('paldal') || lower.includes('yeongtong') || lower.includes('seryu') || lower.includes('seryui')) {
+    return '경기도 수원시'
+  }
+  if (lower.includes('namhyang') || lower.includes('namhang')) {
+    return '부산광역시 남항동'
+  }
+  if (lower.includes('yeongdo')) {
+    return '부산광역시 영도구'
+  }
+  if (lower.includes('seoul')) return '서울특별시'
+  if (lower.includes('incheon')) return '인천광역시'
+  if (lower.includes('busan')) return '부산광역시'
+  if (lower.includes('daegu')) return '대구광역시'
+  if (lower.includes('daejeon')) return '대전광역시'
+  if (lower.includes('gwangju')) return '광주광역시'
+  if (lower.includes('ulsan')) return '울산광역시'
+  if (lower.includes('sejong')) return '세종특별자치시'
+  if (lower.includes('jeju')) return '제주특별자치도'
+  if (lower.includes('seongnam')) return '경기도 성남시'
+  if (lower.includes('goyang')) return '경기도 고양시'
+  if (lower.includes('yongin')) return '경기도 용인시'
+  if (lower.includes('bucheon')) return '경기도 부천시'
+  if (lower.includes('ansan')) return '경기도 안산시'
+  if (lower.includes('anyang')) return '경기도 안양시'
+  return name
+}
+
 export default function App() {
   const [time, setTime] = useState(new Date())
   const [weather, setWeather] = useState({ temp: '25', desc: '맑음', location: '경기도 수원시', icon: 'sun' })
@@ -105,7 +136,7 @@ export default function App() {
         setWeather({
           temp: Math.round(data.main.temp).toString(),
           desc: data.weather[0].description,
-          location: data.name === 'Suwon-si' ? '경기도 수원시' : data.name,
+          location: translateLocation(data.name),
           icon: getWeatherIconName(data.weather[0].icon)
         })
       } catch (err) {

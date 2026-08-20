@@ -37,7 +37,11 @@ export default function TodayFocus() {
   }
 
   return (
-    <div className="card" style={{ justifyContent: 'center' }}>
+    <div className="card focus-card" style={{ justifyContent: 'center' }}>
+      <div className="focus-badge-top">
+        <span className="focus-badge-text">TODAY FOCUS</span>
+      </div>
+
       {isEditing ? (
         <form onSubmit={handleSubmit} className="focus-card-content" style={{ cursor: 'default' }}>
           <div className="focus-input-wrapper">
@@ -62,7 +66,6 @@ export default function TodayFocus() {
         <div className="focus-card-content" onClick={handleStartEdit}>
           <div className="focus-display">
             <span className="focus-task-text">"{focusText}"</span>
-            <span className="focus-label-bottom">TODAY FOCUS</span>
           </div>
           <button 
             type="button" 
