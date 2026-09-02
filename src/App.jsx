@@ -124,7 +124,7 @@ export default function App() {
 
   // Weather fetching
   useEffect(() => {
-    const apiKey = import.meta.env.VITE_OPENWEATHER_API_KEY
+    const apiKey = import.meta.env.VITE_OPENWEATHER_API_KEY || '6605aee0a6279ee22604151fde837403'
     if (!apiKey) return
 
     const fetchWeather = async (lat, lon) => {
