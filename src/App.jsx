@@ -74,9 +74,53 @@ const translateLocation = (name) => {
   return name
 }
 
+const getKoreanLocationName = async (lat, lon, fallbackName) => {
+  try {
+    // 1. BigDataCloud 무료 한글 역지오코딩 시도 (시/도 + 시/군/구 + 읍/면/동)
+    const geoRes = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=ko`)
+    if (geoRes.ok) {
+      const geoData = await geoRes.json()
+      const province = geoData.principalSubdivision || ''
+      const city = geoData.city || ''
+      const locality = geoData.locality || ''
+      
+      // 행정구역 구성 (예: 경기도 수원시, 서울특별시 강남구)
+      const parts = [province, city, locality].filter(Boolean)
+      if (parts.length > 0) {
+        // 중복 및 불필요한 조합 정리
+        if (province && city && locality) {
+          return `${province} ${city} ${locality}`
+        }
+        if (province && city) {
+          return `${province} ${city}`
+        }
+        return parts.join(' ')
+      }
+    }
+  } catch (e) {
+    console.warn('BigDataCloud reverse geocode failed, trying fallback:', e)
+  }
+
+  // 2. OpenWeather Geocoding reverse API 시도
+  try {
+    const apiKey = import.meta.env.VITE_OPENWEATHER_API_KEY || '6605aee0a6279ee22604151fde837403'
+    const res = await fetch(`https://api.openweathermap.org/geo/1.0/reverse?lat=${lat}&lon=${lon}&limit=1&appid=${apiKey}`)
+    if (res.ok) {
+      const data = await res.json()
+      if (data && data[0] && data[0].local_names && data[0].local_names.ko) {
+        return data[0].local_names.ko
+      }
+    }
+  } catch (e) {
+    console.warn('OpenWeather reverse geocode failed:', e)
+  }
+
+  return translateLocation(fallbackName)
+}
+
 export default function App() {
   const [time, setTime] = useState(new Date())
-  const [weather, setWeather] = useState({ temp: '25', desc: '맑음', location: '경기도 수원시', icon: 'sun' })
+  const [weather, setWeather] = useState({ temp: '25', desc: '맑음', location: '위치 확인 중...', icon: 'sun' })
   const [userName, setUserName] = useState(() => localStorage.getItem('dashboard_username') || '')
   const [loginInput, setLoginInput] = useState('')
   
@@ -129,15 +173,18 @@ export default function App() {
 
     const fetchWeather = async (lat, lon) => {
       try {
-        const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric&lang=kr`
-        const res = await fetch(url)
-        if (!res.ok) throw new Error('Weather fetch failed')
-        const data = await res.json()
+        const [weatherRes, locationName] = await Promise.all([
+          fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric&lang=kr`),
+          getKoreanLocationName(lat, lon, '')
+        ])
+
+        if (!weatherRes.ok) throw new Error('Weather fetch failed')
+        const data = await weatherRes.json()
         
         setWeather({
           temp: Math.round(data.main.temp).toString(),
           desc: data.weather[0].description,
-          location: translateLocation(data.name),
+          location: locationName || translateLocation(data.name),
           icon: getWeatherIconName(data.weather[0].icon)
         })
       } catch (err) {
