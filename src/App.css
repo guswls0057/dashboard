@@ -283,12 +283,13 @@ body {
   text-align: center;
 }
 
+.quote-author,
 .quote-category {
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
   color: #0284c7;
   text-align: center;
-  letter-spacing: 1px;
+  letter-spacing: 0.5px;
 }
 
 /* Focus Timer Card */
@@ -372,12 +373,12 @@ body {
 
 .dday-badge {
   background-color: rgba(124, 58, 237, 0.12);
-  border: 1px solid rgba(124, 58, 237, 0.2);
+  border: 1.5px solid rgba(124, 58, 237, 0.45);
   color: #7c3aed;
-  font-size: 24px;
+  font-size: 22px;
   font-weight: 700;
-  padding: 8px 16px;
-  border-radius: 8px;
+  padding: 4px 20px;
+  border-radius: 9999px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -386,32 +387,29 @@ body {
 
 .dday-footer {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   align-items: center;
-  margin-top: 4px;
+  margin-top: 6px;
 }
 
-.dday-count {
-  font-size: 14px;
-  font-weight: 500;
-  color: #475569;
-}
-
-.btn-dday-nav {
+.btn-dday-page {
   background: none;
   border: none;
   cursor: pointer;
-  color: #0f172a;
+  color: #1e293b;
   font-size: 14px;
   font-weight: 500;
   display: flex;
   align-items: center;
-  gap: 4px;
-  transition: color 0.2s;
+  gap: 5px;
+  padding: 2px 4px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
 }
 
-.btn-dday-nav:hover {
+.btn-dday-page:hover {
   color: #7c3aed;
+  transform: translateX(2px);
 }
 
 /* Today's Focus Card */

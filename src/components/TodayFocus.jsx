@@ -37,7 +37,18 @@ export default function TodayFocus({ onUpdateQuote }) {
 
     try {
       const ai = new GoogleGenAI({ apiKey })
-      const prompt = `사용자가 입력한 오늘의 핵심 일과 또는 감정: "${trimmedVal}". 이와 관련하여 마음에 영감을 주거나 동기를 부여하는 명언 1구절(한글 50자 이내)과 저자(또는 저자 카테고리) 정보를 한국어로 작성해 주세요. 출력 형식은 다른 설명 없이 반드시 "명언 | 저자" 처럼 파이프 기호(|)로만 구분해 주세요. 예: "끝까지 해내는 자가 승리한다. | 격언"`
+      const prompt = `사용자가 입력한 오늘의 핵심 일과 또는 관심사: "${trimmedVal}".
+이와 관련하여 마음에 깊은 영감과 울림을 주는 유명한 명언 1구절(한국어 60자 이내)과 그 명언을 남긴 '실제 인물(작가, 철학자, 위인, 기업가 등)의 실명'을 한국어로 작성해 주세요.
+
+[중요 지침]
+1. 저자 자리에는 '성장', '동기부여', '격언', '개발자' 같은 주제/카테고리나 역할을 절대 쓰지 마세요.
+2. 반드시 실존 인물(예: 스티브 잡스, 알베르트 아인슈타인, 윈스턴 처칠, 프리드리히 니체, 괴테, 공자 등)의 이름을 한국어로 명시하세요.
+3. 출력 형식은 부가 설명 없이 오직 아래 형식으로만 출력하세요:
+명언 내용 | 인물 이름
+
+예시:
+단순함이 궁극의 정교함이다. | 레오나르도 다빈치
+승리는 가장 끈기 있는 자에게 돌아간다. | 나폴레옹 보나파르트`
       
       let response
       try {
@@ -53,18 +64,22 @@ export default function TodayFocus({ onUpdateQuote }) {
         })
       }
 
-      const text = response.text || response.text()
+      const text = response.text || (typeof response.text === 'function' ? response.text() : '')
       if (text) {
         const parts = text.split('|')
         if (parts.length >= 2) {
+          const rawQuote = parts[0].trim().replace(/^["'“”]+|["'“”]+$/g, '')
+          const rawAuthor = parts[1].replace(/[－\s\-—]/g, '').trim()
           onUpdateQuote({
-            text: parts[0].trim(),
-            category: `－ ${parts[1].trim()} －`
+            text: rawQuote,
+            author: rawAuthor || '작자 미상',
+            category: `－ ${rawAuthor || '작자 미상'} －`
           })
         } else {
           onUpdateQuote({
-            text: text.trim(),
-            category: '－ AI WORKSPACES －'
+            text: text.trim().replace(/^["'“”]+|["'“”]+$/g, ''),
+            author: '작자 미상',
+            category: '－ 작자 미상 －'
           })
         }
       }

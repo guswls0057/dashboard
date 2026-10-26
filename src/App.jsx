@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { MapPin, Calendar as CalendarIcon, Sun, Cloud, CloudRain, CloudSnow, CloudLightning, User, LogOut, Play, Pause, Target, ChevronRight } from 'lucide-react'
+import { MapPin, Calendar as CalendarIcon, Sun, Cloud, CloudRain, CloudSnow, CloudLightning, User, LogOut, Play, Pause, Target, ArrowRight } from 'lucide-react'
 
 // Import components
 import TodayFocus from './components/TodayFocus.jsx'
@@ -132,10 +132,25 @@ export default function App() {
   const [ddayIndex, setDdayIndex] = useState(0)
 
   // Quotes State
-  const [quote, setQuote] = useState({
-    text: '가장 좋은 프롬프트는 당신이 무엇을 원하는 지 명확히 아는 지성에서 출발한다.',
-    category: '－ AI WORKSPACES －'
+  const [quote, setQuote] = useState(() => {
+    const saved = localStorage.getItem('dashboard_quote')
+    if (saved) {
+      try {
+        return JSON.parse(saved)
+      } catch (e) {
+        console.error('Failed to parse saved quote:', e)
+      }
+    }
+    return {
+      text: '단순함이 궁극의 정교함이다.',
+      author: '레오나르도 다빈치'
+    }
   })
+
+  const handleUpdateQuote = (newQuote) => {
+    setQuote(newQuote)
+    localStorage.setItem('dashboard_quote', JSON.stringify(newQuote))
+  }
 
   // Clock ticking
   useEffect(() => {
@@ -272,13 +287,18 @@ export default function App() {
   // D-Day calculation
   const calculateDday = (targetDateStr) => {
     const parts = targetDateStr.split('.')
-    if (parts.length !== 3) return '0'
-    const targetDate = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]))
-    const diffTime = targetDate - time
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+    if (parts.length !== 3) return 'D-0'
     
-    if (diffDays === 0) return '0'
-    return diffDays > 0 ? `${diffDays}` : `+${Math.abs(diffDays)}`
+    const targetDate = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]))
+    const today = new Date(time.getFullYear(), time.getMonth(), time.getDate())
+    
+    const diffTime = targetDate - today
+    const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24))
+    
+    if (diffDays < 0) {
+      return `D+${Math.abs(diffDays)}`
+    }
+    return `D-${diffDays}`
   }
 
   const handleDdayNext = () => {
@@ -385,7 +405,9 @@ export default function App() {
               <p className="quote-text">
                 "{quote.text}"
               </p>
-              <span className="quote-category">{quote.category}</span>
+              <span className="quote-author">
+                － {quote.author || quote.category?.replace(/[－\s-]/g, '') || '작자 미상'} －
+              </span>
             </div>
           </div>
         </div>
@@ -416,14 +438,14 @@ export default function App() {
                   <span className="dday-date">목표일 : {currentDday.date}</span>
                 </div>
                 <div className="dday-badge">
-                  D-{calculateDday(currentDday.date)}
+                  {calculateDday(currentDday.date)}
                 </div>
               </div>
               
               <div className="dday-footer">
-                <span className="dday-count">{ddayIndex + 1} / {D_DAY_GOALS.length}</span>
-                <button className="btn-dday-nav" onClick={handleDdayNext}>
-                  다음 <ChevronRight size={14} />
+                <button className="btn-dday-page" onClick={handleDdayNext} aria-label="다음 D-Day 목표 보기">
+                  <span>{ddayIndex + 1} / {D_DAY_GOALS.length}</span>
+                  <ArrowRight size={14} />
                 </button>
               </div>
             </div>
@@ -433,7 +455,7 @@ export default function App() {
 
       {/* Section 02 */}
       <section className="section-02">
-        <TodayFocus onUpdateQuote={setQuote} />
+        <TodayFocus onUpdateQuote={handleUpdateQuote} />
         <MoodTracker />
       </section>
 
